@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:drawable="@drawable/ic_if_add_user_plus_"
+        app:srcCompat="@drawable/ic_if_add_user_plus_"
+
+       /> <!-- include your icon here -->
+    <!--
+      android:tint="@android:color/holo_blue_dark"
+      app:backgroundTint="@android:color/holo_blue_dark"
+    -->
+    <item>
+        <shape
+            android:color="#00000000"
+            android:innerRadius="0dp"
+
+            android:shape="ring"
+            android:thicknessRatio="1.1"
+            android:useLevel="false" >
+            <!-- 24dp: android:thicknessRatio=".8"-->
+            <!-- 32dp: android:thicknessRatio="1.1"-->
+            <solid android:color="@android:color/transparent" />
+
+            <stroke
+                android:width="2dp"
+                android:color="@android:color/holo_blue_light" />
+        </shape>
+    </item>
+
+</layer-list>
