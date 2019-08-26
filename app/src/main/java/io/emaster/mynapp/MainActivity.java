@@ -16,14 +16,22 @@ import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
+import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import io.emaster.mynapp.HomeFragment;
 
@@ -38,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    DatabaseReference rootRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +55,15 @@ public class MainActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+        rootRef = FirebaseDatabase.getInstance().getReference();
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if(currentUser != null) {
             String email = currentUser.getEmail();
-            getSupportActionBar().setTitle(email);
+            if(!TextUtils.isEmpty(email)){
+                getSupportActionBar().setTitle(email);
+            }
             getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimaryS)));
         }
 
@@ -75,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         super.onOptionsItemSelected(item);
         if(item.getItemId() == R.id.main_find_friends_option){
-
+            return true;
         }
         if(item.getItemId() == R.id.main_settings_option){
             sendUserToSettingsActivity();
@@ -95,17 +107,46 @@ public class MainActivity extends AppCompatActivity {
 
         if(currentUser == null){
             sendUserToLoginActivity();
+        }else{
+            verifyUserExistance();
         }
+    }
+
+    private void verifyUserExistance() {
+        String currentUserId = currentUser.getUid();
+        rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("username").exists()){
+                    String username = dataSnapshot.child("username").toString();
+                    Toast toast= Toast.makeText(getApplicationContext(),
+                            "Welcome " + username, Toast.LENGTH_LONG);
+                    toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
+                    toast.show();
+                }else{
+                    sendUserToSettingsActivity();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void sendUserToSettingsActivity() {
         Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+        settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(settingsIntent);
+        finish();
     }
 
     private void sendUserToLoginActivity() {
         Intent loginIntent = new Intent(MainActivity.this, LoginActivity3.class);
+        loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(loginIntent);
+        finish();
     }
 
     private void setupBottomNavigation() {
