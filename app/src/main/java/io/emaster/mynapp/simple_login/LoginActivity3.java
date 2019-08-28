@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -130,6 +131,7 @@ public class LoginActivity3 extends AppCompatActivity {
                                         errorMessage, Toast.LENGTH_LONG);
                                 toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
                                 toast.show();
+                                Log.e("Login", ""+ errorMessage);
                             }
                         }
                     });

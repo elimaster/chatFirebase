@@ -4,15 +4,20 @@ package io.emaster.mynapp;
 
 //import androidx.fragment.app.Fragment;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import io.emaster.mynapp.simple_login.LoginActivity3;
 import io.emaster.mynapp.ui.login.*;
+
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +35,7 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -97,6 +103,9 @@ public class MainActivity extends AppCompatActivity {
         if(item.getItemId() == R.id.main_find_friends_option){
             return true;
         }
+        if(item.getItemId() == R.id.main_create_group_option){
+           requestNewGroup();
+        }
         if(item.getItemId() == R.id.main_settings_option){
             sendUserToSettingsActivityBackEnabled();
         }
@@ -107,6 +116,43 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    private void requestNewGroup() {
+        AlertDialog.Builder alertDialogGroup = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialog);
+        alertDialogGroup.setTitle("Enter Group Name :");
+        final EditText groupNameEditText = new EditText(MainActivity.this);
+        groupNameEditText.setHint("write name group");
+        alertDialogGroup.setView(groupNameEditText);
+        alertDialogGroup.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String groupName = groupNameEditText.getText().toString();
+                if (TextUtils.isEmpty(groupName)) {
+                    showToastMessage("please enter group name");
+                }else{
+                    createNewGroup(groupName);
+                }
+            }
+
+        });
+        alertDialogGroup.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+        alertDialogGroup.show();
+    }
+
+    private void createNewGroup(final String groupName) {
+        rootRef.child("Groups").child(groupName).setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    showToastMessage(groupName + " is created successfully");
+                }
+            }
+        });
+    }
 
 
     @Override
@@ -126,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.child("username").exists()){
-                    String username = dataSnapshot.child("username").toString();
+                    String username = dataSnapshot.child("username").getValue().toString();
                     Toast toast= Toast.makeText(getApplicationContext(),
                             "Welcome " + username, Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
@@ -221,6 +267,13 @@ public class MainActivity extends AppCompatActivity {
         //ft.attach(settingsFragment);
         ft.addToBackStack(null);
         ft.commit();
+    }
+
+    private void showToastMessage(String message) {
+        Toast toast= Toast.makeText(getApplicationContext(),
+                message, Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
+        toast.show();
     }
 
 }
