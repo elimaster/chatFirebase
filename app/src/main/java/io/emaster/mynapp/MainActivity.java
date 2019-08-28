@@ -59,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         if(currentUser != null) {
             String email = currentUser.getEmail();
             if(!TextUtils.isEmpty(email)){
@@ -86,11 +88,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         super.onOptionsItemSelected(item);
+        if(item.getItemId() == android.R.id.home) {
+            getSupportFragmentManager().popBackStack();
+            //getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            //getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            return true;
+        }
         if(item.getItemId() == R.id.main_find_friends_option){
             return true;
         }
         if(item.getItemId() == R.id.main_settings_option){
-            sendUserToSettingsActivity();
+            sendUserToSettingsActivityBackEnabled();
         }
         if(item.getItemId() == R.id.main_logout_option){
             mAuth.signOut();
@@ -142,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    private void sendUserToSettingsActivityBackEnabled(){
+        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+        //settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(settingsIntent);
+    }
+
     private void sendUserToLoginActivity() {
         Intent loginIntent = new Intent(MainActivity.this, LoginActivity3.class);
         loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -179,7 +193,9 @@ public class MainActivity extends AppCompatActivity {
 
         homeFragment =  HomeFragment.newInstance();
         androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_frame, homeFragment);
+        ft.replace(R.id.fragment_frame, homeFragment, "homeFragment");
+        //ft.attach(homeFragment);
+        ft.addToBackStack(null);
         ft.commit();
 
 
@@ -190,7 +206,9 @@ public class MainActivity extends AppCompatActivity {
         androidx.fragment.app.FragmentManager fragmentManager =  getSupportFragmentManager();
         androidx.fragment.app.FragmentTransaction ft = fragmentManager.beginTransaction();
         profileFragment = ProfileFragment.newInstance();
-        ft.replace(R.id.fragment_frame, profileFragment);
+        ft.replace(R.id.fragment_frame, profileFragment, "profileFragment");
+        //ft.attach(profileFragment);
+        ft.addToBackStack(null);
         ft.commit();
     }
 
@@ -199,7 +217,9 @@ public class MainActivity extends AppCompatActivity {
         settingsFragment = SettingsFragment.newInstance();
         androidx.fragment.app.FragmentManager fragmentManager =  getSupportFragmentManager();
         androidx.fragment.app.FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(R.id.fragment_frame, settingsFragment);
+        ft.replace(R.id.fragment_frame, settingsFragment, "settingsFragment");//   .add(R.id.fragment_container, firstFragment)
+        //ft.attach(settingsFragment);
+        ft.addToBackStack(null);
         ft.commit();
     }
 

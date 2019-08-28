@@ -1,7 +1,10 @@
 package io.emaster.mynapp;
 
 import androidx.annotation.NonNull;
+
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,8 +19,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -28,6 +34,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Button updateAccountSettings;
     private EditText userName, userStatus;
     private CircleImageView userProfileImage;
+    Toolbar actionBar;
 
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
@@ -98,8 +105,55 @@ public class SettingsActivity extends AppCompatActivity {
         userName = findViewById(R.id.set_profile_user_name);
         userStatus = findViewById(R.id.set_profile_status);
         updateAccountSettings = findViewById(R.id.update_settings_button);
+        //actionBar = getSupportActionBar();
+        actionBar =  findViewById(R.id.toolbar_settings);
+        setSupportActionBar(actionBar);
+        //actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        // TODO: Remove the redundant calls to getSupportActionBar()
+        //       and use variable actionBar instead
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        //this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+/*        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);*/
+        actionBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                finish();
+            }
+        });
+
+        String currentUserId = currentUser.getUid();
+        rootRef.child("Users").child(currentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.child("username").exists() && dataSnapshot.child("status").exists()){
+                    String userName = dataSnapshot.child("username").getValue().toString();
+                    String userStatus = dataSnapshot.child("status").getValue().toString();
+                    EditText userNameET = findViewById(R.id.set_profile_user_name);
+                    EditText userStatusET = findViewById(R.id.set_profile_status);
+                    userNameET.setText(userName);
+                    userStatusET.setText(userStatus);
+
+                }else{
+                    //sendUserToSettingsActivity();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
     }
+
+/*    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }*/
 
     private void sendToMainActivity() {
         Intent mainIntent = new Intent(this, MainActivity.class);

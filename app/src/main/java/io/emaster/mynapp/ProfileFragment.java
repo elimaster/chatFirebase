@@ -8,9 +8,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 public class ProfileFragment extends Fragment {
+    Toolbar actionBar;
 
     public static ProfileFragment newInstance() {
 
@@ -28,6 +31,37 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        //actionBar =  view.findViewById(R.id.toolbar);
+        //setSupportActionBar(actionBar);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
+/*        actionBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });*/
+
+
+
+
         return view;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+
+/*        // This callback will only be called when MyFragment is at least Started.
+        OnBackPressedCallback callback = new OnBackPressedCallback(true *//* enabled by default *//*) {
+            @Override
+            public void handleOnBackPressed() {
+                // Handle the back button event
+            }
+        });
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);*/
+
+        // The callback can be enabled or disabled here or in handleOnBackPressed()
     }
 }
