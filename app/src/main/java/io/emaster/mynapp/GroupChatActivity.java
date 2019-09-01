@@ -1,14 +1,23 @@
 package io.emaster.mynapp;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ScrollView;
@@ -16,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,6 +35,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
+
+import io.emaster.mynapp.adapter.MessageListAdapter;
 
 
 public class GroupChatActivity extends AppCompatActivity {
@@ -33,12 +46,16 @@ public class GroupChatActivity extends AppCompatActivity {
     EditText sendMessageEditText;
     ScrollView groupChatScrollView;
     TextView displayTextMessages;
+    ScrollView myScrollView;
     String groupName;
     String currentUserId, currentUserName;
     String currentDate, currentTime;
     FirebaseAuth mAuth;
     DatabaseReference usersRef, groupsRef;
     DatabaseReference groupMessageKeyRef;
+
+    private RecyclerView mMessageRecycler;
+    private MessageListAdapter mMessageAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +70,7 @@ public class GroupChatActivity extends AppCompatActivity {
         groupsRef = FirebaseDatabase.getInstance().getReference().child("Groups").child(groupName);
 
 
+
         initializeFields();
         getUserInfo();
 
@@ -61,6 +79,82 @@ public class GroupChatActivity extends AppCompatActivity {
             public void onClick(View view) {
                 saveMessageInfoToDatabase();
                 sendMessageEditText.setText("");
+                //hide keyboard
+/*                getWindow().setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+                );*/
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+            }
+        });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        groupsRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                if(dataSnapshot.exists()){
+                    displayMessages(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                if(dataSnapshot.exists()){
+                    displayMessages(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void displayMessages(DataSnapshot dataSnapshot) {
+        Handler h = new Handler(getApplicationContext().getMainLooper());
+       Iterator iterator =  dataSnapshot.getChildren().iterator();
+       while(iterator.hasNext()){
+           final String chatDate = (String) ((DataSnapshot) iterator.next()).getValue();
+           final String chatMessage = (String) ((DataSnapshot) iterator.next()).getValue();
+           final String chatTime = (String) ((DataSnapshot) iterator.next()).getValue();
+           final String chatUsername = (String) ((DataSnapshot) iterator.next()).getValue();
+
+           //displayTextMessages.append(chatUsername +" : \n"+ chatMessage + "\n"+ chatTime + "   "+ chatDate+ "\n\n\n");
+           Log.d("message", chatUsername +" : \n"+ chatMessage + "\n"+ chatTime + "   "+ chatDate+ "\n\n\n");
+
+
+           h.post(new Runnable() {
+               @Override
+               public void run() {
+                   displayTextMessages.append(chatUsername +" : \n"+ chatMessage + "\n"+ chatTime + "   "+ chatDate+ "\n\n\n");
+               }
+           });
+
+           myScrollView.post(new Runnable() {
+               @Override
+               public void run() {
+                   myScrollView.fullScroll(View.FOCUS_DOWN);
+               }
+           });
+       }
+        myScrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                myScrollView.fullScroll(View.FOCUS_DOWN);
             }
         });
     }
@@ -117,6 +211,21 @@ public class GroupChatActivity extends AppCompatActivity {
         sendMessageEditText = findViewById(R.id.input_group_chat);
         groupChatScrollView = findViewById(R.id.group_chat_scroll_view);
         displayTextMessages = findViewById(R.id.group_chat_text_display);
+        myScrollView = findViewById(R.id.group_chat_scroll_view);
+        myScrollView.fullScroll(View.FOCUS_DOWN);
+        myScrollView.post(new Runnable() {
+            @Override
+            public void run() {
+                myScrollView.fullScroll(View.FOCUS_DOWN);
+            }
+        });
+
+
+        //displayTextMessages.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        //mMessageRecycler = (RecyclerView) findViewById(R.id.reyclerview_message_list);
+        //mMessageAdapter = new MessageListAdapter(this, messageList);
+        //mMessageRecycler.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     private void showToastMessage(String message) {
