@@ -23,6 +23,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     implementation 'com.shaishavgandhi:login-buttons:1.0.0'
     implementation 'de.hdodenhof:circleimageview:3.0.0'
     implementation 'com.android.support:design:29.0.0'

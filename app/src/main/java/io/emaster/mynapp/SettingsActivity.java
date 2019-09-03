@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -25,6 +26,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.HashMap;
 
@@ -38,10 +44,14 @@ public class SettingsActivity extends AppCompatActivity {
     Toolbar actionBar;
 
     private FirebaseAuth mAuth;
+    @Nullable
     FirebaseUser currentUser;
+    @Nullable
+    String currentUserID;
     DatabaseReference rootRef;
 
     private static final int GALLERY_PIC = 1;
+    private StorageReference userProfileStorageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +60,9 @@ public class SettingsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         currentUser = mAuth.getCurrentUser();
+        currentUserID = currentUser.getUid();
         rootRef = FirebaseDatabase.getInstance().getReference();
+        userProfileStorageRef = FirebaseStorage.getInstance().getReference().child("ProfileImages");
 
         initializeFields();
         updateAccountSettings.setOnClickListener(new View.OnClickListener() {
@@ -75,6 +87,37 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == GALLERY_PIC && resultCode == RESULT_OK && data != null){
+            Uri imageUri = data.getData();
+            // start picker to get image for cropping and then use the image in cropping activity
+            CropImage.activity()
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1,1)
+                    .start(this);
+        }
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+
+                StorageReference filePath = userProfileStorageRef.child(currentUserID + ".jpg");
+                filePath.putFile(resultUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        if(task.isSuccessful()){
+                            showToastMessage("profile image uploaded successfull");
+                        }else{
+                            String errMessage = task.getException().getMessage().toString();
+                            showToastMessage(errMessage);
+                        }
+                    }
+                });
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
+        }
     }
 
     private void updateSettings() {
