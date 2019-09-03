@@ -23,6 +23,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.shaishavgandhi:login-buttons:1.0.0'
     implementation 'de.hdodenhof:circleimageview:3.0.0'
     implementation 'com.android.support:design:29.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'

@@ -85,6 +85,8 @@ public class GroupChatActivity extends AppCompatActivity {
                 );*/
                 InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
                 imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+
+                myScrollView.fullScroll(View.FOCUS_DOWN);
             }
         });
     }
@@ -144,6 +146,7 @@ public class GroupChatActivity extends AppCompatActivity {
                }
            });
 
+           myScrollView.fullScroll(View.FOCUS_DOWN);
            myScrollView.post(new Runnable() {
                @Override
                public void run() {

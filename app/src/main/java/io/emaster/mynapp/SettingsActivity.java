@@ -2,6 +2,7 @@ package io.emaster.mynapp;
 
 import androidx.annotation.NonNull;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -40,6 +41,8 @@ public class SettingsActivity extends AppCompatActivity {
     FirebaseUser currentUser;
     DatabaseReference rootRef;
 
+    private static final int GALLERY_PIC = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +60,21 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
 
+        userProfileImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent();
+                galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+                galleryIntent.setType("image/*");
+                startActivityForResult(galleryIntent, GALLERY_PIC);
+            }
+        });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     private void updateSettings() {
@@ -105,6 +123,7 @@ public class SettingsActivity extends AppCompatActivity {
         userName = findViewById(R.id.set_profile_user_name);
         userStatus = findViewById(R.id.set_profile_status);
         updateAccountSettings = findViewById(R.id.update_settings_button);
+        userProfileImage = findViewById(R.id.set_profile_image);
         //actionBar = getSupportActionBar();
         actionBar =  findViewById(R.id.toolbar_settings);
         setSupportActionBar(actionBar);

@@ -2,6 +2,7 @@ package io.emaster.mynapp.simple_login;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -28,7 +29,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import com.shaishavgandhi.loginbuttons.BaseButton;
+import com.shaishavgandhi.loginbuttons.GoogleButton;
+
 import io.emaster.mynapp.MainActivity;
+import io.emaster.mynapp.PhoneLoginActivity;
 import io.emaster.mynapp.R;
 
 public class LoginActivity3 extends AppCompatActivity {
@@ -37,6 +42,12 @@ public class LoginActivity3 extends AppCompatActivity {
     EditText usernameEditText;
     EditText passwordEditText;
     ProgressBar loadingProgressBar;
+
+    GoogleButton round_btn_1;
+/*    com.shaishavgandhi.loginbuttons.FacebookButton  round_btn_2;
+    com.shaishavgandhi.loginbuttons.TwitterButton  round_btn_3;
+    com.shaishavgandhi.loginbuttons.LinkedInButton round_btn_4;*/
+
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
 
@@ -44,6 +55,12 @@ public class LoginActivity3 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login3);
+
+         round_btn_1 = findViewById(R.id.round_btn_1);
+
+         //round_btn_1.setBackgroundDrawable(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_home_black_24dp));
+         //round_btn_1.setBackgroundResource(R.drawable.ic_home_black_24dp);
+        //round_btn_1.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_home_black_24dp, 0, 0, 0);
 
 
         mAuth = FirebaseAuth.getInstance();
@@ -87,6 +104,14 @@ public class LoginActivity3 extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 AllowUserToLogin();
+            }
+        });
+
+        round_btn_1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LoginActivity3.this, PhoneLoginActivity.class);
+                startActivity(intent);
             }
         });
 
