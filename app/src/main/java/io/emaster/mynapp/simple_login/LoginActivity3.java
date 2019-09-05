@@ -141,7 +141,10 @@ public class LoginActivity3 extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
-                                String email = currentUser.getEmail();
+                                String email = "";
+                                if(currentUser != null) {
+                                    email = currentUser.getEmail();
+                                }
                                 loadingProgressBar.setVisibility(View.GONE);
                                 //progressBarMessage.setVisibility(View.GONE);
                                 Toast toast= Toast.makeText(getApplicationContext(),

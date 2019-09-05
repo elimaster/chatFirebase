@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import io.emaster.mynapp.simple_login.LoginActivity3;
-import io.emaster.mynapp.ui.login.*;
+
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         if(item.getItemId() == R.id.main_find_friends_option){
-            return true;
+            sendUserToFindFriendsActivityBackEnabled();
         }
         if(item.getItemId() == R.id.main_create_group_option){
            requestNewGroup();
@@ -200,6 +200,12 @@ public class MainActivity extends AppCompatActivity {
         Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
         //settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(settingsIntent);
+    }
+
+    private void sendUserToFindFriendsActivityBackEnabled(){
+        Intent findFriendsIntent = new Intent(MainActivity.this, FindFriendsActivity.class);
+        //settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(findFriendsIntent);
     }
 
     private void sendUserToLoginActivity() {

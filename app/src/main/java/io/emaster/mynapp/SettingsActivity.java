@@ -117,8 +117,39 @@ public class SettingsActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             showToastMessage("profile image uploaded successfull");
 
-                            final String downloadUrl = task.getResult().getUploadSessionUri().toString();
-                            rootRef.child("Users").child(currentUserID).child("image")
+                             //String downloadUrl;// = task.getResult().getUploadSessionUri().toString();
+                            userProfileStorageRef.child(currentUserID+".jpg").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    // Got the download URL for 'users/me/profile.png'
+                                    // Pass it to Picasso to download, show in ImageView and caching
+                                    Log.d("imageUrl__2", uri.toString());
+                                    String downloadUrl = uri.toString();
+                                    rootRef.child("Users").child(currentUserID).child("image")
+                                            .setValue(downloadUrl)
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if(task.isSuccessful()){
+                                                        showToastMessage("profile image added to storage");
+                                                    }else{
+                                                        String errMessage = task.getException().getMessage();
+                                                        showToastMessage(errMessage);
+                                                    }
+                                                }
+                                            });
+                                    //Picasso.get().load(uri).into(userProfileImage);
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle any errors
+                                }
+                            });
+                            ///////////////////////////////
+                            ////task.getResult().getMetadata().getPath();
+
+/*                            rootRef.child("Users").child(currentUserID).child("image")
                                     .setValue(downloadUrl)
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
@@ -130,7 +161,7 @@ public class SettingsActivity extends AppCompatActivity {
                                                 showToastMessage(errMessage);
                                             }
                                         }
-                                    });
+                                    });*/
                         }else{
                             String errMessage = task.getException().getMessage().toString();
                             showToastMessage(errMessage);
@@ -218,7 +249,12 @@ public class SettingsActivity extends AppCompatActivity {
                 if(dataSnapshot.child("username").exists() && dataSnapshot.child("status").exists()){
                     String userNameRetrive = dataSnapshot.child("username").getValue().toString();
                     String userStatusRetrive = dataSnapshot.child("status").getValue().toString();
-                    String userImageProfileRetrive = dataSnapshot.child("image").getValue().toString();
+                    String userImageProfileRetrive;// = (String) dataSnapshot.child("image").getValue();
+                    if( dataSnapshot.child("image").exists()){
+                        userImageProfileRetrive =  dataSnapshot.child("image").getValue().toString();
+                    }else{
+                        userImageProfileRetrive ="";
+                    }
                     Log.d("imageUrl", userImageProfileRetrive.toString());
                     //userProfileStorageRef = FirebaseStorage.getInstance().getReference().child("ProfileImages");
 
