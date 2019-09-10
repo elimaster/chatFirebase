@@ -265,7 +265,7 @@ public class SettingsActivity extends AppCompatActivity {
                             // Got the download URL for 'users/me/profile.png'
                             // Pass it to Picasso to download, show in ImageView and caching
                             Log.d("imageUrl__2", uri.toString());
-                            Picasso.get().load(uri).into(userProfileImage);
+                            Picasso.get().load(uri).placeholder(R.drawable.headshot_7).into(userProfileImage);
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override

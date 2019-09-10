@@ -240,9 +240,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadHomeFragment() {
-
-
-
         homeFragment =  HomeFragment.newInstance();
         androidx.fragment.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_frame, homeFragment, "homeFragment");

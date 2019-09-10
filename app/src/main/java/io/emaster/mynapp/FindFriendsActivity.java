@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.emaster.mynapp.model.Contact;
+import io.emaster.mynapp.simple_login.LoginActivity3;
 
 
 public class FindFriendsActivity extends AppCompatActivity {
@@ -59,12 +61,24 @@ public class FindFriendsActivity extends AppCompatActivity {
         FirebaseRecyclerAdapter<Contact, findFriendViewHolder> firebaseAdapter =
                 new FirebaseRecyclerAdapter<Contact, findFriendViewHolder>(options) {
                     @Override
-                    protected void onBindViewHolder(@NonNull findFriendViewHolder findFriendViewHolder, int i, @NonNull Contact contact) {
+                    protected void onBindViewHolder(@NonNull findFriendViewHolder findFriendViewHolder, final int i, @NonNull Contact contact) {
                         findFriendViewHolder.userNameTV.setText(contact.getUsername());
                         findFriendViewHolder.userStatusTV.setText(contact.getStatus());
                         /////////////////////////
                         Log.d("message", contact.getImage() +"\n\n");
-                        Picasso.get().load(contact.getImage()).into(findFriendViewHolder.userImage);
+                        Picasso.get().load(contact.getImage()).placeholder(R.drawable.headshot_7).into(findFriendViewHolder.userImage);
+
+                        findFriendViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                String visit_user_id = getRef(i).getKey();
+                                Intent profileIntent = new Intent(FindFriendsActivity.this, ProfileActivity.class);
+                                profileIntent.putExtra("visit_user_id", visit_user_id);
+                                startActivity(profileIntent);
+                                finish();
+
+                            }
+                        });
                     }
 
                     @NonNull
