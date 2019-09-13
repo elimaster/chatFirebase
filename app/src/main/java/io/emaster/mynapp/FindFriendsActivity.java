@@ -55,8 +55,8 @@ public class FindFriendsActivity extends AppCompatActivity {
 
         FirebaseRecyclerOptions<Contact> options =
                 new FirebaseRecyclerOptions.Builder<Contact>()
-                .setQuery(usersRef, Contact.class)
-                .build();
+                        .setQuery(usersRef, Contact.class)
+                        .build();
 
         FirebaseRecyclerAdapter<Contact, findFriendViewHolder> firebaseAdapter =
                 new FirebaseRecyclerAdapter<Contact, findFriendViewHolder>(options) {

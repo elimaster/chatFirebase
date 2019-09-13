@@ -80,7 +80,7 @@ public class HomeFragment extends Fragment {
         adapter.addFragment(new HomeFragmentChats(), "CHATS");//chats
         adapter.addFragment(new HomeFragmentGroups(), "GROUPS");//groups
         adapter.addFragment(new HomeFragmentContacts(), "CONTACTS");//contacts
-
+        adapter.addFragment(new HomeFragmentRequests(), "REQUESTS");//contacts
         viewPager.setAdapter(adapter);
 
 
