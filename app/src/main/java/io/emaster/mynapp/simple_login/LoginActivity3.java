@@ -28,6 +28,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import com.shaishavgandhi.loginbuttons.BaseButton;
 import com.shaishavgandhi.loginbuttons.GoogleButton;
@@ -36,7 +42,7 @@ import io.emaster.mynapp.MainActivity;
 import io.emaster.mynapp.PhoneLoginActivity;
 import io.emaster.mynapp.R;
 
-public class LoginActivity3 extends AppCompatActivity {
+public class LoginActivity3  extends AppCompatActivity  {
     private static final String TAG = "LoginActivity3";
     private static final int REQUEST_SIGNUP = 0;
     EditText usernameEditText;
@@ -50,6 +56,7 @@ public class LoginActivity3 extends AppCompatActivity {
 
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    DatabaseReference usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +71,7 @@ public class LoginActivity3 extends AppCompatActivity {
 
 
         mAuth = FirebaseAuth.getInstance();
+        usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
         //currentUser = mAuth.getCurrentUser();
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
@@ -152,7 +160,32 @@ public class LoginActivity3 extends AppCompatActivity {
                                 toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
                                 toast.show();
 
-                                sendUserToMainActivity();
+                                final String currentUserID = mAuth.getCurrentUser().getUid();
+                                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( LoginActivity3.this,  new OnSuccessListener<InstanceIdResult>() {
+                                    @Override
+                                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                                        String newToken = instanceIdResult.getToken();
+                                        Log.e("newToken",newToken);
+
+                                        usersRef.child(currentUserID).child("device_token")
+                                                .setValue(newToken)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()){
+                                                            sendUserToMainActivity();
+                                                        }
+                                                    }
+                                                });
+
+                                    }
+                                });
+
+
+                                //FirebaseInstanceId.getInstance().instanceId.addOnSuccessListener(this) { instanceIdResult ->
+                                //        val deviceToken = instanceIdResult.token
+                                //}
+                                //sendUserToMainActivity();
                             }else {
                                 String errorMessage = task.getException().toString();
                                 Toast toast= Toast.makeText(getApplicationContext(),
@@ -178,4 +211,19 @@ public class LoginActivity3 extends AppCompatActivity {
         InputMethodManager inputMethodManager =(InputMethodManager)getSystemService(Activity.INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+
+
+
+/*    class FCMMessageReceiverService extends FirebaseMessagingService() {
+
+        override fun onNewToken(token: String?) {
+            super.onNewToken(token)
+            // Perform your task
+        }
+
+        override fun onMessageReceived(remoteMessage: RemoteMessage?) {
+            // Create notification
+        }
+    }*/
 }

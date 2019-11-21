@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -23,6 +24,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import io.emaster.mynapp.MainActivity;
 import io.emaster.mynapp.R;
@@ -32,6 +35,7 @@ public class RegisterActivity3 extends AppCompatActivity {
     private static final int REQUEST_SIGNUP = 0;
     private FirebaseAuth mAuth;
     DatabaseReference rootRef;
+    DatabaseReference usersRef;
      EditText usernameEditText;
      EditText passwordEditText;
      TextView progressBarMessage;
@@ -44,6 +48,7 @@ public class RegisterActivity3 extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         rootRef = FirebaseDatabase.getInstance().getReference();//"Users");
+        usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
 
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
@@ -111,7 +116,7 @@ public class RegisterActivity3 extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if(task.isSuccessful()){
                                 String userEmail = mAuth.getCurrentUser().getEmail();
-                                String currentUserId = mAuth.getCurrentUser().getUid();
+                                final String currentUserId = mAuth.getCurrentUser().getUid();
                                 //String userId = rootRef.push().getKey();
 
 
@@ -125,8 +130,26 @@ public class RegisterActivity3 extends AppCompatActivity {
                                 toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
                                 toast.show();
 
-                                //sendToLoginActivity();
-                                sendToMainActivity();
+                                FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( RegisterActivity3.this,  new OnSuccessListener<InstanceIdResult>() {
+                                    @Override
+                                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                                        String newToken = instanceIdResult.getToken();
+                                        Log.e("newToken",newToken);
+
+                                        usersRef.child(currentUserId).child("device_token")
+                                                .setValue(newToken)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()){
+                                                            sendToMainActivity();
+                                                        }
+                                                    }
+                                                });
+
+                                    }
+                                });
+
                             }else {
                                 String errorMessage = task.getException().toString();
                                 Toast toast= Toast.makeText(getApplicationContext(),

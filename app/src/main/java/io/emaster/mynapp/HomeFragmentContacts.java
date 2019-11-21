@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -48,7 +49,7 @@ public class HomeFragmentContacts  extends Fragment {
         contactsRef = FirebaseDatabase.getInstance().getReference().child("Contacts");
         usersRef = FirebaseDatabase.getInstance().getReference().child("Users");
         mAuth = FirebaseAuth.getInstance();
-        currentUserID = mAuth.getCurrentUser().getUid();
+        //currentUserID = mAuth.getCurrentUser().getUid();
 
         myContactsRecyclerView = contactsView.findViewById(R.id.contacts_recycler_view);
         myContactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -65,6 +66,7 @@ public class HomeFragmentContacts  extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        currentUserID = mAuth.getCurrentUser().getUid();
 
         FirebaseRecyclerOptions options =
                 new FirebaseRecyclerOptions.Builder<Contact>()
@@ -79,23 +81,40 @@ public class HomeFragmentContacts  extends Fragment {
                 usersRef.child(usersIDs).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.hasChild("image")){
-                            String profileName = dataSnapshot.child("username").getValue().toString();
-                            String profileStatus = dataSnapshot.child("status").getValue().toString();
-                            String profileImage = dataSnapshot.child("image").getValue().toString();
+                        if(dataSnapshot.exists()){
+                            if(dataSnapshot.hasChild("image")){
+                                String profileName = dataSnapshot.child("username").getValue().toString();
+                                String profileStatus = dataSnapshot.child("status").getValue().toString();
+                                String profileImage = dataSnapshot.child("image").getValue().toString();
 
-                            contactsViewHolder.nameUserTV.setText(profileName);
-                            contactsViewHolder.statusUserTV.setText(profileStatus);
-                            Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
-                        }else{
-                            String profileName = dataSnapshot.child("username").getValue().toString();
-                            String profileStatus = dataSnapshot.child("status").getValue().toString();
-                            //String profileImage = dataSnapshot.child("image").getValue().toString();
+                                contactsViewHolder.nameUserTV.setText(profileName);
+                                contactsViewHolder.statusUserTV.setText(profileStatus);
+                                Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
+                            }else{
+                                String profileName = dataSnapshot.child("username").getValue().toString();
+                                String profileStatus = dataSnapshot.child("status").getValue().toString();
+                                //String profileImage = dataSnapshot.child("image").getValue().toString();
 
-                            contactsViewHolder.nameUserTV.setText(profileName);
-                            contactsViewHolder.statusUserTV.setText(profileStatus);
-                            //Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
+                                contactsViewHolder.nameUserTV.setText(profileName);
+                                contactsViewHolder.statusUserTV.setText(profileStatus);
+                                //Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
+                            }
+
+                            if(dataSnapshot.hasChild("userState")){
+                                String state  = dataSnapshot.child("userState").child("state").getValue().toString();
+                                String date  = dataSnapshot.child("userState").child("date").getValue().toString();
+                                String time  = dataSnapshot.child("userState").child("time").getValue().toString();
+
+                                if(state.equals("online")){
+                                    contactsViewHolder.onlineIcon.setVisibility(View.VISIBLE);
+                                }else if(state.equals("offline")){
+                                    contactsViewHolder.onlineIcon.setVisibility(View.INVISIBLE);
+                                }
+                            }else{
+                                contactsViewHolder.onlineIcon.setVisibility(View.INVISIBLE);
+                            }
                         }
+
                     }
 
                     @Override
@@ -123,6 +142,7 @@ public class HomeFragmentContacts  extends Fragment {
         TextView nameUserTV;
         TextView statusUserTV;
         CircleImageView imageUserIV;
+        ImageView onlineIcon;
 
         public contactsViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -130,6 +150,9 @@ public class HomeFragmentContacts  extends Fragment {
             nameUserTV = (TextView) itemView.findViewById(R.id.user_profile_name);
             statusUserTV = (TextView) itemView.findViewById(R.id.user_profile_status);
             imageUserIV = (CircleImageView) itemView.findViewById(R.id.users_profile_image);
+            onlineIcon = itemView.findViewById(R.id.user_online_status);
         }
     }
+
+
 }

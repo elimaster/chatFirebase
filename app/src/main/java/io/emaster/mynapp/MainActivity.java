@@ -39,6 +39,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashMap;
+
 import io.emaster.mynapp.HomeFragment;
 
 import static androidx.constraintlayout.solver.widgets.ConstraintWidget.GONE;
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     FirebaseUser currentUser;
     DatabaseReference rootRef;
+    String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
-        currentUser = mAuth.getCurrentUser();
+        //currentUser = mAuth.getCurrentUser();
         rootRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -110,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
             sendUserToSettingsActivityBackEnabled();
         }
         if(item.getItemId() == R.id.main_logout_option){
+            updateUserStatus("offline");
             mAuth.signOut();
             sendUserToLoginActivity();
         }
@@ -158,11 +164,33 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        currentUser = mAuth.getCurrentUser();
 
         if(currentUser == null){
             sendUserToLoginActivity();
         }else{
+            updateUserStatus("online");
             verifyUserExistance();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //currentUser = mAuth.getCurrentUser();
+
+        if(currentUser != null){
+            //updateUserStatus("offline");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        currentUser = mAuth.getCurrentUser();
+
+        if(currentUser != null){
+            updateUserStatus("offline");
         }
     }
 
@@ -277,6 +305,25 @@ public class MainActivity extends AppCompatActivity {
                 message, Toast.LENGTH_LONG);
         toast.setGravity(Gravity.TOP| Gravity.CENTER_HORIZONTAL, 0, 0);
         toast.show();
+    }
+
+    private void updateUserStatus(String state){
+        String saveCurrentTime, saveCurrentDate;
+        Calendar calendar =  Calendar.getInstance();
+        SimpleDateFormat currentDate = new SimpleDateFormat("MMM dd, yyyy");
+        saveCurrentDate = currentDate.format(calendar.getTime());
+        SimpleDateFormat currentTime = new SimpleDateFormat("hh:mm a");
+        saveCurrentTime = currentTime.format(calendar.getTime());
+
+        HashMap<String, Object> onlineState = new HashMap<>();
+        onlineState.put("time", saveCurrentTime);
+        onlineState.put("date", saveCurrentDate);
+        onlineState.put("state", state);
+
+        currentUserID =mAuth.getCurrentUser().getUid();
+        rootRef.child("Users").child(currentUserID).child("userState")
+                .updateChildren(onlineState);
+
     }
 
 }

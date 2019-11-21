@@ -186,11 +186,11 @@ public class SettingsActivity extends AppCompatActivity {
             message = "Please provide user status";
             showToastMessage(message);
         }else{
-            HashMap<String, String> profileUserMap = new HashMap<>();
+            HashMap<String, Object> profileUserMap = new HashMap<>();
             profileUserMap.put("uid", userId);
             profileUserMap.put("username", username);
             profileUserMap.put("status", userstatus);
-            rootRef.child("Users").child(userId).setValue(profileUserMap)
+            rootRef.child("Users").child(userId).updateChildren(profileUserMap)
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
@@ -229,6 +229,7 @@ public class SettingsActivity extends AppCompatActivity {
         //       and use variable actionBar instead
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle("My account settings");
         //this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 /*        getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);*/

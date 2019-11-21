@@ -173,7 +173,7 @@ public class HomeFragmentRequests extends Fragment {
                 getTypeRef.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.exists()){
+                        if(dataSnapshot.exists() /*&& (dataSnapshot.getValue().equals("received")) /*&& (!dataSnapshot.getValue().equals("sent"))*/){
                             Log.d("DATA", dataSnapshot.toString());
                            String get_type =  dataSnapshot.getValue().toString();
                             Log.d("DATA1", get_type);
@@ -304,6 +304,139 @@ public class HomeFragmentRequests extends Fragment {
 
                                     }
                                 });
+                           }else if(get_type.equals("sent")){
+                               Button request_sent_btn = contactsViewHolder.itemView.findViewById(R.id.accept_request_btn);
+                               request_sent_btn.setText("request sent");
+
+                               contactsViewHolder.itemView.findViewById(R.id.accept_cancel_btn).setVisibility(View.INVISIBLE);
+
+                               usersRef.child(usersIDs).addValueEventListener(new ValueEventListener() {
+                                   @Override
+                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                       Log.d("DATA_2", dataSnapshot.toString());
+                                       if(dataSnapshot.hasChild("image")){
+                                           //String profileName = dataSnapshot.child("username").getValue().toString();
+                                           //String profileStatus = dataSnapshot.child("status").getValue().toString();
+                                           String profileImage = dataSnapshot.child("image").getValue().toString();
+
+                                           //contactsViewHolder.nameUserTV.setText(profileName);
+                                           //contactsViewHolder.statusUserTV.setText(profileStatus);
+                                           Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
+                                       }
+                                       String profileName = dataSnapshot.child("username").getValue().toString();
+                                       String profileStatus = dataSnapshot.child("status").getValue().toString();
+                                       //String profileImage = dataSnapshot.child("image").getValue().toString();
+
+                                       contactsViewHolder.nameUserTV.setText(profileName);
+                                       contactsViewHolder.statusUserTV.setText("you have sent a request to "+ profileName);
+                                       //Picasso.get().load(profileImage).placeholder(R.drawable.headshot_7).into(contactsViewHolder.imageUserIV);
+
+
+                                       contactsViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                                           @Override
+                                           public void onClick(View view) {
+                                               CharSequence optionsChar[] = new CharSequence[]{
+
+                                                       "Cancel Chat Request"
+                                               };
+                                               AlertDialog.Builder dialog = new AlertDialog.Builder(getContext())
+                                                       .setTitle("Already sent request")
+                                                       .setItems(optionsChar, new DialogInterface.OnClickListener() {
+                                                           @Override
+                                                           public void onClick(DialogInterface dialogInterface, int i) {
+/*                                                               if(i == 0){//accept
+                                                                   contactsRef.child(currentUserID).child(usersIDs)
+                                                                           .child("contact").setValue("saved")
+                                                                           .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                               @Override
+                                                                               public void onComplete(@NonNull Task<Void> task) {
+                                                                                   if(task.isSuccessful()){
+                                                                                       contactsRef.child(usersIDs).child(currentUserID)
+                                                                                               .child("contact").setValue("saved")
+                                                                                               .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                   @Override
+                                                                                                   public void onComplete(@NonNull Task<Void> task) {
+                                                                                                       if(task.isSuccessful()){
+                                                                                                           chatRequestsRef.child(currentUserID).child(usersIDs)
+                                                                                                                   .removeValue()
+                                                                                                                   .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                       @Override
+                                                                                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                           if(task.isSuccessful()){
+                                                                                                                               chatRequestsRef.child(usersIDs).child(currentUserID)
+                                                                                                                                       .removeValue()
+                                                                                                                                       .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                           @Override
+                                                                                                                                           public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                               if(task.isSuccessful()){
+                                                                                                                                                   showToastMessage("new contact saved");
+                                                                                                                                               }
+                                                                                                                                           }
+                                                                                                                                       });
+                                                                                                                           }
+                                                                                                                       }
+                                                                                                                   });
+                                                                                                       }
+                                                                                                   }
+                                                                                               });
+                                                                                   }
+                                                                               }
+                                                                           });
+                                                               }*/
+                                                               if(i == 0){//cancel
+                                                                   contactsRef.child(currentUserID).child(usersIDs)
+                                                                           .child("contact").setValue("saved")
+                                                                           .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                               @Override
+                                                                               public void onComplete(@NonNull Task<Void> task) {
+                                                                                   if(task.isSuccessful()){
+                                                                                       contactsRef.child(usersIDs).child(currentUserID)
+                                                                                               .child("contact").setValue("saved")
+                                                                                               .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                   @Override
+                                                                                                   public void onComplete(@NonNull Task<Void> task) {
+                                                                                                       if(task.isSuccessful()){
+                                                                                                           chatRequestsRef.child(currentUserID).child(usersIDs)
+                                                                                                                   .removeValue()
+                                                                                                                   .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                       @Override
+                                                                                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                           if(task.isSuccessful()){
+                                                                                                                               chatRequestsRef.child(usersIDs).child(currentUserID)
+                                                                                                                                       .removeValue()
+                                                                                                                                       .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                           @Override
+                                                                                                                                           public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                               if(task.isSuccessful()){
+                                                                                                                                                   showToastMessage("you have canceled the chat request");
+                                                                                                                                               }
+                                                                                                                                           }
+                                                                                                                                       });
+                                                                                                                           }
+                                                                                                                       }
+                                                                                                                   });
+                                                                                                       }
+                                                                                                   }
+                                                                                               });
+                                                                                   }
+                                                                               }
+                                                                           });
+                                                               }
+                                                           }
+                                                       });
+                                               dialog.show();
+                                           }
+
+
+                                       });
+                                   }
+
+                                   @Override
+                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                   }
+                               });
+
                            }
                         }
 
